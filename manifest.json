@@ -4,7 +4,8 @@
   "version": "1.0",
   "description": "Streams the latest ChatGPT response in real-time to a Google Doc.",
   "permissions": [
-    "storage"
+    "storage",
+    "identity"
   ],
   "action": {
     "default_popup": "popup.html"
@@ -23,7 +24,6 @@
     "service_worker": "background.js"
   },
   "host_permissions": [
-    "https://script.google.com/*",
-    "https://script.googleusercontent.com/*"
+    "https://docs.googleapis.com/*"
   ]
 }

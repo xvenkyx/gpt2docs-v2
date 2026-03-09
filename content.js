@@ -1,28 +1,28 @@
-let webhookUrl = "";
+let docId = "";
 let lastObservedText = "";
 let lastSendTime = 0;
 let throttleTimer = null;
 
-// Load webhook URL from extension storage on startup
-chrome.storage.local.get(["webhookUrl"], (res) => {
-    if (res.webhookUrl) {
-        webhookUrl = res.webhookUrl;
-        console.log("ChatGPT-GDocs: Webhook URL loaded.");
+// Load Doc ID from extension storage on startup
+chrome.storage.local.get(["docId"], (res) => {
+    if (res.docId) {
+        docId = res.docId;
+        console.log("ChatGPT-GDocs: Doc ID loaded.");
     }
 });
 
 // Listen for updates from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === "UPDATE_URL") {
-        webhookUrl = request.webhookUrl;
-        console.log("ChatGPT-GDocs: Webhook URL updated.");
+    if (request.type === "UPDATE_DOC_ID") {
+        docId = request.docId;
+        console.log("ChatGPT-GDocs: Doc ID updated.");
         sendResponse({ success: true });
     }
 });
 
 // Observe DOM changes in ChatGPT interface
 const observer = new MutationObserver(() => {
-    if (!webhookUrl) return;
+    if (!docId) return;
 
     // ChatGPT uses data-message-author-role="assistant" for AI responses
     const assistantMessages = document.querySelectorAll('[data-message-author-role="assistant"]');
@@ -36,8 +36,9 @@ const observer = new MutationObserver(() => {
         lastObservedText = text;
         const now = Date.now();
         
-        // Google Apps Script limits requests, so we throttle to send a frame max 1x per second
-        const throttleInterval = 1000;
+        // Official API is extremely fast, so we can drop throttle to 250ms
+        // Note: Google Docs API standard limit is 300 writes per minute per user
+        const throttleInterval = 250;
         
         if (now - lastSendTime >= throttleInterval) {
             lastSendTime = now;
@@ -61,22 +62,21 @@ observer.observe(document.body, {
 });
 
 function sendToGoogleDocs(text) {
-    if (!webhookUrl) return;
+    if (!docId) return;
 
     try {
         chrome.runtime.sendMessage({
             type: "SEND_TO_GDOCS",
-            url: webhookUrl,
             text: text
         }, (response) => {
             if (chrome.runtime.lastError) {
-                // Ignore the error silently. It could just fail to send.
+                // Ignore the error silently
             }
         });
     } catch (error) {
         if (error.message && error.message.includes('Extension context invalidated')) {
-            console.warn("ChatGPT-GDocs: Extension was updated or reloaded. The current page's script is orphaned. Disconnecting observer.");
-            observer.disconnect(); // Stop the loop and error spam!
+            console.warn("ChatGPT-GDocs: Extension was updated or reloaded. Disconnecting observer.");
+            observer.disconnect(); // Stop the loop
         } else {
             console.error("ChatGPT-GDocs Error:", error);
         }

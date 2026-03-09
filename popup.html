@@ -20,7 +20,7 @@
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -33,26 +33,40 @@
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
+      margin-bottom: 10px;
     }
     button:hover {
       background-color: #0d8a6a;
     }
+    #authBtn {
+      background-color: #4285f4;
+    }
+    #authBtn:hover {
+      background-color: #357ae8;
+    }
     .status {
       margin-top: 10px;
-      font-size: 12px;
+      font-size: 13px;
       color: green;
       display: none;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h3>ChatGPT to Google Docs</h3>
   
-  <label for="webhookUrl">Google Apps Script Webhook URL:</label>
-  <input type="text" id="webhookUrl" placeholder="https://script.google.com/macros/s/.../exec">
+  <label for="clientId">Google Web Client ID:</label>
+  <input type="text" id="clientId" placeholder="e.g. 12345678-abc.apps.googleusercontent.com">
+
+  <label for="docId">Google Document ID:</label>
+  <input type="text" id="docId" placeholder="e.g. 1JNw2LT...">
   
-  <button id="saveBtn">Save & Start Streaming</button>
-  <div id="status" class="status">Saved! Live streaming to Google Docs.</div>
+  <button id="authBtn">1. Authorize with Google</button>
+  <button id="saveBtn">2. Save & Start Streaming</button>
+
+  <div id="status" class="status"></div>
 
   <script src="popup.js"></script>
 </body>
