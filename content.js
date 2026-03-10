@@ -36,9 +36,9 @@ const observer = new MutationObserver(() => {
         lastObservedText = text;
         const now = Date.now();
         
-        // Official API is extremely fast, so we can drop throttle to 250ms
-        // Note: Google Docs API standard limit is 300 writes per minute per user
-        const throttleInterval = 250;
+        // Increased throttle to 1500ms to avoid Google Docs API rate limits (300 req/min).
+        // Each sync currently takes 2 API calls (Get + BatchUpdate), so 1.5s = 40 syncs/min = 80 calls/min.
+        const throttleInterval = 1500;
         
         if (now - lastSendTime >= throttleInterval) {
             lastSendTime = now;
